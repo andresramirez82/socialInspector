@@ -1,0 +1,50 @@
+name: social_inspector
+description: A Flutter application to inspect social media profiles.
+
+# Esta es la parte que falta y es obligatoria en versiones modernas de Flutter
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.1.0
+  path_provider: ^2.1.1
+  url_launcher: ^6.2.1
+  msix: ^3.16.1 # <--- Añade esto aquí
+
+dev_dependencies:
+  flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/data.json
+    - assets/pf.png
+
+flutter_launcher_icons:
+  image_path: "assets/pf.png"
+  image_path_android: "assets/pf.png"
+  image_path_ios: "assets/pf.png"
+  image_path_windows: "assets/pf.png"
+  image_path_macos: "assets/pf.png"
+  image_path_web: "assets/pf.png"
+  android: true
+  # notification_icon: "assets/pf" # <-- This line is no longer needed with `android: true`
+  windows:
+    generate: true
+  macos:
+    generate: true
+  web:
+    generate: true
+    image_size: 192
+
+msix_config:
+  display_name: Social Inspector
+  publisher_display_name: Pixel Forge
+  identity_name: com.andresramirez82.socialinspector
+  msix_version: 1.0.0.0
+  logo_path: assets/pf.png # Opcional: si tienes un icono
+  capabilities: internetClient, internetClientServer # Importante para que tu app tenga permiso de internet
