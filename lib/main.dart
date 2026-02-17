@@ -71,7 +71,7 @@ class SherlockHome extends StatefulWidget {
 class _SherlockHomeState extends State<SherlockHome> {
   final TextEditingController _controller = TextEditingController();
   Map<String, dynamic> _sitesData = {};
-  List<Map<String, String>> _results = [];
+  final List<Map<String, String>> _results = [];
   bool _isSearching = false;
 
   @override
@@ -242,9 +242,9 @@ class _SherlockHomeState extends State<SherlockHome> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                const Text(
                   appName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
@@ -416,7 +416,7 @@ class _SherlockHomeState extends State<SherlockHome> {
                           ),
                         ),
                         filled: true,
-                        fillColor: Color(0xFFFAFAFA),
+                        fillColor: const Color(0xFFFAFAFA),
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: isMobile ? 16 : 20,
                           vertical: isMobile ? 14 : 18,
@@ -679,9 +679,9 @@ class _SherlockHomeState extends State<SherlockHome> {
                           child: Image.network(
                             iconUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Icon(
+                            errorBuilder: (context, error, stackTrace) => const Icon(
                               Icons.public,
-                              color: const Color(0xFF6366F1),
+                              color: Color(0xFF6366F1),
                             ),
                           ),
                         ),
@@ -732,10 +732,10 @@ class _SherlockHomeState extends State<SherlockHome> {
                                 ),
                               ),
                             ),
-                            Icon(
+                            const Icon(
                               Icons.open_in_new,
                               size: 16,
-                              color: const Color(0xFF6366F1),
+                              color: Color(0xFF6366F1),
                             ),
                           ],
                         ),
