@@ -169,54 +169,101 @@ class _SherlockHomeState extends State<SherlockHome> {
         }
       }
 
-      // Prioridad 1: Usar urlProbe si está disponible
-      if (config['urlProbe'] != null) {
-        final probeUrl = config['urlProbe'].replaceAll('{}', username);
-        
-        if (config['errorType'] == 'status_code') {
-          final response = await http.get(Uri.parse(probeUrl)).timeout(const Duration(seconds: 10));
-          exists = (response.statusCode == 200);
-        } else if (config['errorType'] == 'message') {
-          final response = await http.get(Uri.parse(probeUrl)).timeout(const Duration(seconds: 10));
-          final errorMsg = config['errorMsg'];
-          
-          // Si NO contiene el mensaje de error = usuario existe
-          bool hasErrorMsg = false;
-          if (errorMsg is String) {
-            hasErrorMsg = response.body.contains(errorMsg);
-          } else if (errorMsg is List) {
-            hasErrorMsg = errorMsg.any((m) => response.body.contains(m.toString()));
-          }
-          exists = !hasErrorMsg;
+      final isPost = config['request_method']?.toString().toUpperCase() == 'POST';
+
+      // Helper recursivo para construir el body de un POST request (soporta Map y List anidados)
+      dynamic _processTemplate(dynamic template) {
+        if (template is String) {
+          return template.replaceAll('{}', username);
+        } else if (template is Map) {
+          return template.map((key, value) => MapEntry(key, _processTemplate(value)));
+        } else if (template is List) {
+          return template.map((e) => _processTemplate(e)).toList();
         }
-      } else {
-        // Prioridad 2: Usar URL principal si no hay urlProbe
-        if (config['errorType'] == 'status_code') {
-          final response = await http.head(Uri.parse(url)).timeout(const Duration(seconds: 10));
-          exists = (response.statusCode == 200);
-        } else if (config['errorType'] == 'message') {
-          final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
-          final errorMsg = config['errorMsg'];
-          
-          // Si NO contiene el mensaje de error = usuario existe
-          bool hasErrorMsg = false;
-          if (errorMsg is String) {
-            hasErrorMsg = response.body.contains(errorMsg);
-          } else if (errorMsg is List) {
-            hasErrorMsg = errorMsg.any((m) => response.body.contains(m.toString()));
-          }
-          exists = !hasErrorMsg;
+        return template;
+      }
+
+      // Headers base
+      final Map<String, String> headers = {
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9,es;q=0.8',
+      };
+
+      // Mezclar con headers específicos del sitio si existen
+      if (config['headers'] != null && config['headers'] is Map) {
+        config['headers'].forEach((k, v) {
+          headers[k.toString()] = v.toString();
+        });
+      }
+
+      // Helper para hacer un request con soporte GET/POST
+      Future<http.Response> _doRequest(String requestUrl) async {
+        if (isPost) {
+          final payload = _processTemplate(config['request_payload']);
+          return await http
+              .post(
+                Uri.parse(requestUrl),
+                headers: headers,
+                body: payload != null ? jsonEncode(payload) : null,
+              )
+              .timeout(const Duration(seconds: 10));
+        } else {
+          return await http
+              .get(
+                Uri.parse(requestUrl),
+                headers: headers,
+              )
+              .timeout(const Duration(seconds: 10));
         }
+      }
+
+      // Determinar qué URL usar para la prueba
+      final String probeUrl = (config['urlProbe'] ?? url).toString().replaceAll('{}', username);
+
+      // Realizar la petición
+      final response = await _doRequest(probeUrl);
+      final errorType = config['errorType'];
+
+      // Evaluar éxito inicial por status code
+      bool isSuccess = (response.statusCode >= 200 && response.statusCode < 300);
+      final errorCode = config['errorCode'];
+      if (errorCode != null) {
+        isSuccess = (response.statusCode != errorCode);
+      }
+
+      if (errorType == 'status_code') {
+        exists = isSuccess;
+      } else if (errorType == 'message') {
+        final errorMsg = config['errorMsg'];
+        bool matchesError = false;
+        if (errorMsg is String) {
+          matchesError = response.body.contains(errorMsg);
+        } else if (errorMsg is List) {
+          matchesError = errorMsg.any((m) => response.body.contains(m.toString()));
+        }
+        // Existe si el status es de éxito Y NO se encontró el mensaje de error
+        exists = isSuccess && !matchesError;
+      } else if (errorType == 'response_url') {
+        // En response_url, si la URL final redirigida es la de error, no existe
+        final errorUrlTemplate = config['errorUrl']?.toString();
+        bool isErrorUrl = false;
+        if (errorUrlTemplate != null) {
+          final errorUrl = errorUrlTemplate.replaceAll('{}', username);
+          final finalUrl = response.request?.url.toString();
+          isErrorUrl = (finalUrl == errorUrl);
+        }
+        exists = isSuccess && !isErrorUrl;
       }
 
       if (exists) {
         setState(() {
-          _results.add({'name': name, 'url': url});
+          _results.add({'name': name, 'url': url.replaceAll('{}', username)});
         });
       }
     } catch (e) {
       debugPrint("Error verificando $name: $e");
-      // Ignorar errores de conexión o timeouts
     }
   }
 

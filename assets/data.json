@@ -733,6 +733,18 @@
     "urlMain": "https://fameswap.com/",
     "username_claimed": "fameswap"
   },
+  "Facebook": {
+    "errorMsg": [
+      "Este contenido no está disponible",
+      "This content isn't available",
+      "Página no encontrada",
+      "Page not found"
+    ],
+    "errorType": "message",
+    "url": "https://www.facebook.com/{}",
+    "urlMain": "https://www.facebook.com/",
+    "username_claimed": "zuck"
+  },
   "Fandom": {
     "errorType": "status_code",
     "url": "https://www.fandom.com/u/{}",
@@ -1051,16 +1063,10 @@
     "username_claimed": "kilroy222"
   },
   "Holopin": {
-    "errorMsg": "true",
-    "errorType": "message",
-    "request_method": "POST",
-    "request_payload": {
-      "username": "{}"
-    },
+    "errorType": "status_code",
     "url": "https://holopin.io/@{}",
     "urlMain": "https://holopin.io",
-    "urlProbe": "https://www.holopin.io/api/auth/username",
-    "username_claimed": "red"
+    "username_claimed": "stefanjudis"
   },
   "Houzz": {
     "errorType": "status_code",
@@ -1137,9 +1143,8 @@
   },
   "Instagram": {
     "errorType": "status_code",
-    "url": "https://instagram.com/{}",
-    "urlMain": "https://instagram.com/",
-    "urlProbe": "https://imginn.com/{}",
+    "url": "https://www.instagram.com/{}",
+    "urlMain": "https://www.instagram.com/",
     "username_claimed": "instagram"
   },
   "Instructables": {
@@ -2825,13 +2830,6 @@
     "url": "https://www.znanylekarz.pl/{}",
     "urlMain": "https://znanylekarz.pl",
     "username_claimed": "janusz-nowak"
-  },
-  "Bluesky": {
-    "errorType": "status_code",
-    "url": "https://bsky.app/profile/{}.bsky.social",
-    "urlProbe": "https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?actor={}.bsky.social",
-    "urlMain": "https://bsky.app/",
-    "username_claimed": "mcuban"
   },
   "Platzi": {
     "errorType": "status_code",
